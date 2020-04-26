@@ -1,0 +1,19 @@
+{
+  "name": "bullseye-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iamthe-Wraith/bullseye-api.git"
+  },
+  "author": "iamthe-Wraith",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iamthe-Wraith/bullseye-api/issues"
+  },
+  "homepage": "https://github.com/iamthe-Wraith/bullseye-api#readme"
+}
