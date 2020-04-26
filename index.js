@@ -5,15 +5,13 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const bullseyeConfig = require('./bullseye.config');
-const apiRouter = require('./routes/api');
-const Response = require('./utils/response');
-const { API_ROUTE } = require('./constants');
-const { ERROR } = require('./constants');
+const apiRouter = require('./src/routes/api');
+const Response = require('./src/utils/response');
+const { API_ROUTE, ERROR } = require('./src/constants');
 
 mongoose.connection.on('open', () => console.log('[+] database connection open'));
 mongoose.connection.on('error', err => console.log('[-] database connection error', err));
-mongoose.connect(process.env.MONGODB_URI || bullseyeConfig.database.host, {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/bullseye', {
 // mongoose.connect(`mongodb://${bullseyeConfig.database.host}:${bullseyeConfig.database.port}/${bullseyeConfig.database.name}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -23,7 +21,7 @@ mongoose.connect(process.env.MONGODB_URI || bullseyeConfig.database.host, {
 // mongoose.set('useCreateIndex', true);
 
 const app = express();
-const port = process.env.PORT || bullseyeConfig.server.port;
+const port = process.env.PORT || 8080; 
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
