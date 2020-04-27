@@ -42,15 +42,23 @@ class UserControllers {
   static get (req, res) {
     const { username = null } = req.params;
 
+    let query = {};
+
     if (username) {
-      User.get(username)
-        .then(user => Response.send({ user: User.getSharable(user) }, res))
-        .catch(err => Response.error(err, res));
+      query.username = username;
     } else {
-      const error = new Error('no username found');
-      error.data = ERROR.UNPROCESSABLE;
-      Response.error(error, res);
+      query.query = req.query;
     }
+
+    User.get(query)
+      .then(users => {
+        if (username) {
+          Response.send({ user: User.getSharable(users[0]) }, res);
+        } else {
+          Response.send({ users: users.map(user => User.getSharable(user)) }, res);
+        }
+      })
+      .catch(err => Response.error(err, res));
   }
 
   static update (req, res) {

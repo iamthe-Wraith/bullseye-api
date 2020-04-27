@@ -14,8 +14,8 @@ class Product {
   }
 
   static delete (productId) {
-    return Product.get(productId)
-      .then(product => product.remove())
+    return Product.get({ productId })
+      .then(products => products[0].remove())
       .then(() => ProductSchema.findOne({ _id: productId }))
       .then(product => {
         if (product === null) {
@@ -52,13 +52,51 @@ class Product {
     }
   }
 
-  static get (productId) {
-    return ProductSchema.find({ _id: productId })
+  static get (q) {
+    const query = {};
+
+    if (q.productId) {
+      query._id = q.productId;
+    } else if (q.query) {
+      if (q.query.name) query.name = { $regex: q.query.name };
+      if (q.query.category) query.category = { $regex: q.query.category };
+
+      if (q.query.minPrice || q.query.maxPrice) {
+        query.price = {};
+
+        if (q.query.minPrice) {
+          const minPrice = parseFloat(q.query.minPrice);
+
+          if (!isNaN(minPrice)) query.price.$gte = minPrice;
+        }
+
+        if (q.query.maxPrice) {
+          const maxPrice = parseFloat(q.query.maxPrice);
+
+          if (!isNaN(maxPrice)) query.price.$lte = maxPrice;
+        }
+      } else if (q.query.price) {
+        const price = parseFloat(q.query.price);
+
+        if (!isNaN(price)) query.price = price;
+      }
+    }
+
+    return ProductSchema.find(query)
       .then(products => {
         if (products.length) {
-          return products[0];
+          return products;
         } else {
-          const error = new Error(`product with ID ${productId} not found`);
+          let error = null;
+
+          if (q.productId) {
+            error = new Error(`product with ID ${q.productId} not found`);
+          } else if (q.query) {
+            error = new Error('no products matching the provided query were found');
+          } else {
+            error = new Error('no products found');
+          }
+
           error.data = ERROR.NOT_FOUND;
           throw error;
         }
@@ -87,15 +125,15 @@ class Product {
     if (data.category) updatable.category = data.category;
     if (data.price) updatable.price = data.price;
 
-    return Product.get(productId)
-      .then(product => {
+    return Product.get({ productId })
+      .then(products => {
         if (Object.keys(updatable).length === 0) {
           const error = new Error('no updatable data found');
           error.data = ERROR.NOT_FOUND;
           throw error;
         } else {
-          product.set(updatable);
-          return product.save();
+          products[0].set(updatable);
+          return products[0].save();
         }
       })
       .then(() => ProductSchema.findOne({ _id: productId }))

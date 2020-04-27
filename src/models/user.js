@@ -88,13 +88,31 @@ class User {
     };
   }
 
-  static get (username) {
-    return UserSchema.find({ username })
+  static get (q) {
+    const query = {};
+
+    if (q.username) {
+      query.username = q.username;
+    } else if (q.query) {
+      if (q.query.username) query.username = { $regex: q.query.username };
+      if (q.query.email) query.email = { $regex: q.query.email };
+    }
+
+    return UserSchema.find(query)
       .then(users => {
         if (users.length) {
-          return users[0];
+          return users;
         } else {
-          const error = new Error(`${username} not found`);
+          let error = null;
+
+          if (q.username) {
+            error = new Error(`${q.username} not found`);
+          } else if (q.query) {
+            error = new Error('no users matching the provided query were found');
+          } else {
+            error = new Error('no users found');
+          }
+
           error.data = ERROR.NOT_FOUND;
           throw error;
         }

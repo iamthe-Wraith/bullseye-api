@@ -17,8 +17,6 @@ module.exports = {
 
   /* ROUTES */
   API_ROUTE: '/api',
-  PRODUCT_ROUTE: '/product',
   PRODUCTS_ROUTE: '/products',
-  USER_ROUTE: '/user',
   USERS_ROUTE: '/users',
 };

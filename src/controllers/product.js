@@ -32,17 +32,25 @@ class ProductControllers {
   }
 
   static get (req, res) {
-    const { productId } = req.params;
+    const { productId = null } = req.params;
+
+    let query = {};
 
     if (productId) {
-      Product.get(productId)
-        .then(product => Response.send({ product: Product.getSharable(product) }, res))
-        .catch(err => Response.error(err, res));
+      query.productId = productId;
     } else {
-      const error = new Error('no productId found');
-      error.data = ERROR.UNPROCESSABLE;
-      Response.error(error, res);
+      query.query = req.query;
     }
+
+    Product.get(query)
+      .then(products => {
+        if (productId) {
+          Response.send({ product: Product.getSharable(products[0]) }, res)
+        } else {
+          Response.send({ products: products.map(product => Product.getSharable(product)) }, res);
+        }
+      })
+      .catch(err => Response.error(err, res));
   }
 
   static update (req, res) {
