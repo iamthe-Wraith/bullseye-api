@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const apiRouter = require('./src/routes/api');
+const middleware = require('./src/middleware');
 const Response = require('./src/utils/response');
 const { API_ROUTE, ERROR } = require('./src/constants');
 
@@ -25,6 +26,7 @@ const port = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(middleware.auth);
 app.use((err, req, res, next) => {
   if (err) {
     const error = new Error(err.message);
