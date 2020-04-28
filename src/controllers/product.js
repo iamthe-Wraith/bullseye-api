@@ -33,21 +33,19 @@ class ProductControllers {
 
   static get (req, res) {
     const { productId = null } = req.params;
+    const query = { query: req.query };
 
-    let query = {};
-
-    if (productId) {
-      query.productId = productId;
-    } else {
-      query.query = req.query;
-    }
+    if (productId) query.productId = productId;
 
     Product.get(query)
-      .then(products => {
+      .then(response => {
         if (productId) {
-          Response.send({ product: Product.getSharable(products[0]) }, res)
+          Response.send({ product: Product.getSharable(response.products[0]) }, res)
         } else {
-          Response.send({ products: products.map(product => Product.getSharable(product)) }, res);
+          Response.send({
+            products: response.products.map(product => Product.getSharable(product)),
+            count: response.count
+          }, res);
         }
       })
       .catch(err => Response.error(err, res));

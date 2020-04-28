@@ -1,5 +1,10 @@
 const UserSchema = require('../schemas/user');
-const { ERROR } = require('../constants');
+const {
+  DEFAULT_USERS_TO_RETURN,
+  ERROR,
+  MAX_USERS_TO_RETURN
+} = require('../constants');
+const { getPaginationPage } = require('../utils/helpers');
 
 class User {
   static create (
@@ -90,18 +95,34 @@ class User {
 
   static get (q) {
     const query = {};
+    let page = 1;
+    let skipLimit = DEFAULT_USERS_TO_RETURN;
 
-    if (q.username) {
-      query.username = q.username;
-    } else if (q.query) {
+    if (q.username) query.username = q.username;
+    
+    if (q.query) {
+      if (q.query.page) page = getPaginationPage(q.query.page);
+      if (q.query.numUsers) {
+        const numUsers = parseInt(q.query.numUsers);
+
+        if (!isNaN(numUsers)) {
+          skipLimit = numUsers < MAX_USERS_TO_RETURN ? numUsers : MAX_USERS_TO_RETURN;
+        }
+      }
       if (q.query.username) query.username = { $regex: q.query.username };
       if (q.query.email) query.email = { $regex: q.query.email };
     }
 
+    let skipCount = (page - 1) * skipLimit;
+    let results = {};
+
     return UserSchema.find(query)
+      .skip(skipCount)
+      .limit(skipLimit)
+      .sort({ username: 'ascending' })
       .then(users => {
         if (users.length) {
-          return users;
+          results.users = users;
         } else {
           let error = null;
 
@@ -117,6 +138,22 @@ class User {
           throw error;
         }
       })
+      .then(() => new Promise((resolve, reject) => {
+        if (query.username) {
+          resolve(results);
+        } else {
+          UserSchema.countDocuments(query, (err, count) => {
+            if (err) {
+              const error = new Error(err.message);
+              error.data = ERROR.GEN;
+              reject(error);
+            } else {
+              results.count = count;
+              resolve(results);
+            }
+          })
+        }
+      }))
       .catch(err => {
         let error = null;
 

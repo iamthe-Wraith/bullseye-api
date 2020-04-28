@@ -51,11 +51,14 @@ class UserControllers {
     }
 
     User.get(query)
-      .then(users => {
+      .then(results => {
         if (username) {
-          Response.send({ user: User.getSharable(users[0]) }, res);
+          Response.send({ user: User.getSharable(results.users[0]) }, res);
         } else {
-          Response.send({ users: users.map(user => User.getSharable(user)) }, res);
+          Response.send({
+            users: results.users.map(user => User.getSharable(user)),
+            count: results.count
+          }, res);
         }
       })
       .catch(err => Response.error(err, res));

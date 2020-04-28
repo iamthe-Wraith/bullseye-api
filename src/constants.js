@@ -19,4 +19,10 @@ module.exports = {
   API_ROUTE: '/api',
   PRODUCTS_ROUTE: '/products',
   USERS_ROUTE: '/users',
+
+  /* DB */
+  DEFAULT_USERS_TO_RETURN: 10,
+  MAX_USERS_TO_RETURN: 100,
+  DEFAULT_PRODUCTS_TO_RETURN: 20,
+  MAX_PRODUCTS_TO_RETURN: 100
 };
