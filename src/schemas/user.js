@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+const { PERMISSIONS } = require('../constants');
 const {
   isValidUsername,
   isValidEmail,
@@ -29,6 +30,17 @@ const UserSchema = new mongoose.Schema({
     validate: {
       validator: isValidPassword,
       message: 'password must be greater than 6 characters'
+    }
+  },
+  permissions: {
+    type: Number,
+    required: [true, 'permissions are required'],
+    validate: {
+      validator: p => {
+        const pNum = parseInt(p);
+        return (!isNaN(pNum) && Object.values(PERMISSIONS).filter(permission => pNum === permission.lvl).length);
+      },
+      message: 'invalid permissions received'
     }
   }
 });

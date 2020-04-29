@@ -1,8 +1,10 @@
 const UserSchema = require('../schemas/user');
+const Auth = require('../utils/auth');
 const {
   DEFAULT_USERS_TO_RETURN,
   ERROR,
-  MAX_USERS_TO_RETURN
+  MAX_USERS_TO_RETURN,
+  PERMISSIONS
 } = require('../constants');
 const { getPaginationPage } = require('../utils/helpers');
 
@@ -15,17 +17,19 @@ class User {
     return UserSchema.find({ username })
       .then(users => {
         if (users.length === 0) {
-          /*
-           * DO NOT EVER STORE PASSWORD LIKE THIS!!!!
-           * PASSWORDS SHOULD ALWAYS BE HASHED BEFORE BEING STORED IN DB!!!
-           */
-          return new UserSchema({ username, email, password });
+          return Auth.generatePasswordHash(password);
         } else {
           const error = new Error('username already exists');
           error.data = ERROR.CONFLICT;
           throw error;
         }
       })
+      .then(hash => new UserSchema({
+        username,
+        email,
+        password: hash,
+        permissions: PERMISSIONS.MEMBER.lvl
+      }))
       .then(user => user.save())
       .catch(err => {
         let error = null;
@@ -82,14 +86,33 @@ class User {
       });
   }
 
+  static async getRequestor (payload) {
+    try {
+      const results = await User.get({ username: payload.username });
+      const requestor = results.users[0];
+      return requestor;
+    } catch (err) {
+      const error = new Error(`failed to retrieve requestor data - ${err.message}`);
+      error.data = err.data || ERROR.GEN;
+      throw error;
+    }
+  }
+
   /**
    * gets only the data from user object
    * that should be shared with client
    */
   static getSharable (user) {
+    let permissionLabel = null;
+
+    Object.values(PERMISSIONS).forEach(permission => {
+      if (permission.lvl === user.permissions) permissionLabel = permission.label;
+    });
+
     return {
       username: user.username,
-      email: user.email
+      email: user.email,
+      permissions: permissionLabel
     };
   }
 
@@ -168,17 +191,12 @@ class User {
       });
   }
 
-  static update (username, data) {
+  static async update (username, data) {
     const updatable = {};
 
     if (data.username) updatable.username = data.username;
     if (data.email) updatable.email = data.email;
-
-    /*
-     * DO NOT EVER STORE PASSWORD LIKE THIS!!!!
-     * PASSWORDS SHOULD ALWAYS BE HASHED BEFORE BEING STORED IN DB!!!
-     */
-    if (data.password) updatable.password = data.password;
+    if (data.password) updatable.password = await Auth.generatePasswordHash(data.password);
    
     return UserSchema.findOne({ username })
       .then(user => {

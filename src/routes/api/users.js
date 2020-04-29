@@ -1,6 +1,7 @@
 const { Router } = require('express');
 
 const UserControllers = require('../../controllers/user');
+const authMiddleware = require('../../middleware/auth');
 const Response = require('../../utils/response');
 const { ERROR } = require('../../constants');
 
@@ -12,14 +13,14 @@ error.data = ERROR.NOT_ALLOWED;
 router.param('username', (req, res, next) => next());
 
 router.route('/')
-  .post(UserControllers.create)
-  .get(UserControllers.get)
-  .put((req, res, next) => Response.error(error, res))
-  .delete((req, res, next) => Response.error(error, res));
+  .post(authMiddleware, UserControllers.create)
+  .get(authMiddleware, UserControllers.get)
+  .put((req, res, next) => Response.error(error, req, res))
+  .delete((req, res, next) => Response.error(error, req, res));
 
 router.route('/:username')
-  .get(UserControllers.get)
-  .put(UserControllers.update)
-  .delete(UserControllers.delete);
+  .get(authMiddleware, UserControllers.get)
+  .put(authMiddleware, UserControllers.update)
+  .delete(authMiddleware, UserControllers.delete);
 
 module.exports = router;

@@ -6,14 +6,18 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const apiRouter = require('./src/routes/api');
-const middleware = require('./src/middleware');
+const authRouter = require('./src/routes/auth');
 const Response = require('./src/utils/response');
-const { API_ROUTE, ERROR } = require('./src/constants');
+const serviceMiddleware = require('./src/middleware/service');
+const {
+  API_ROUTE,
+  AUTH_ROUTE,
+  ERROR
+} = require('./src/constants');
 
 mongoose.connection.on('open', () => console.log('[+] database connection open'));
 mongoose.connection.on('error', err => console.log('[-] database connection error', err));
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/bullseye', {
-// mongoose.connect(`mongodb://${bullseyeConfig.database.host}:${bullseyeConfig.database.port}/${bullseyeConfig.database.name}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
@@ -26,7 +30,7 @@ const port = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(middleware.auth);
+app.use(serviceMiddleware);
 app.use((err, req, res, next) => {
   if (err) {
     const error = new Error(err.message);
@@ -38,5 +42,6 @@ app.use((err, req, res, next) => {
 })
 
 app.use(API_ROUTE, apiRouter);
+app.use(AUTH_ROUTE, authRouter);
 
 app.listen(port, () => console.log(`[+] server is ready and waiting on port: ${port}`));

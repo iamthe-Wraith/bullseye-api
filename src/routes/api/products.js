@@ -1,6 +1,7 @@
 const { Router } = require('express');
 
 const ProductControllers = require('../../controllers/product');
+const authMiddleware = require('../../middleware/auth');
 const Response = require('../../utils/response');
 const { ERROR } = require('../../constants');
 
@@ -12,15 +13,15 @@ error.data = ERROR.NOT_ALLOWED;
 router.param('productId', (req, res, next) => next());
 
 router.route('/')
-  .post(ProductControllers.create)
+  .post(authMiddleware, ProductControllers.create)
   .get(ProductControllers.get)
-  .put((req, res, next) => Response.error(error, res))
-  .delete((req, res, next) => Response.error(error, res));
+  .put((req, res, next) => Response.error(error, req, res))
+  .delete((req, res, next) => Response.error(error, req, res));
 
 router.route('/:productId')
-  .post((req, res, next) => Response.error(error, res))
+  .post((req, res, next) => Response.error(error, req, res))
   .get(ProductControllers.get)
-  .put(ProductControllers.update)
-  .delete(ProductControllers.delete);
+  .put(authMiddleware, ProductControllers.update)
+  .delete(authMiddleware, ProductControllers.delete);
 
 module.exports = router;
