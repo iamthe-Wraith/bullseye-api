@@ -25,6 +25,7 @@ class Response {
 
       res.setHeader(AUTHORIZATION_HEADER, token);
     }
+
     res.status(errorData.code).json({ message: err.message });
   }
 }

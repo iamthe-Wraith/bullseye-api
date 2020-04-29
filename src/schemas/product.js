@@ -16,6 +16,10 @@ const ProductSchema = new mongoose.Schema({
       validator: price => typeof price === 'number' && price > 0,
       message: 'price must be a number that is greater than 0'
     }
+  },
+  image: {
+    type: String,
+    required: false
   }
 });
 

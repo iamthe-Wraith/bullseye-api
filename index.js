@@ -35,7 +35,7 @@ app.use((err, req, res, next) => {
   if (err) {
     const error = new Error(err.message);
     error.data = ERROR.GEN;
-    Response.error(error, res);
+    Response.error(error, req, res);
   } else {
     next();
   }

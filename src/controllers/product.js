@@ -6,14 +6,14 @@ const { ERROR, PERMISSIONS } = require('../constants');
 class ProductControllers {
   static async create (req, res) {
     const { tokenPayload } = req;
-    const { name, category, price } = req.body;
+    const { name, category, price, image } = req.body;
 
     if (name && category && price) {
       try {
         const requestor = await User.getRequestor(tokenPayload);
 
         if (requestor.permissions <= PERMISSIONS.ADMIN.lvl) {
-          const product = await Product.create(name, category, price);
+          const product = await Product.create(name, category, price, image);
           Response.send({ product: Product.getSharable(product) }, req, res);
         } else {
           const error = new Error('you are not authorized to make this request');

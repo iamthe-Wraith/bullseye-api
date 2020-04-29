@@ -7,8 +7,8 @@ const {
 const { getPaginationPage } = require('../utils/helpers');
 
 class Product {
-  static create (name, category, price) {
-    const product = new ProductSchema({ name, category, price });
+  static create (name, category, price, image) {
+    const product = new ProductSchema({ name, category, price, image });
 
     return product.save()
       .then(product => product)
@@ -64,6 +64,7 @@ class Product {
       name: product.name,
       category: product.category,
       price: product.price,
+      image: product.image,
       id: product._id
     }
   }
