@@ -21,10 +21,6 @@ Retrieving products does not require authentication. All other endpoints require
 
 Once you have successfully signed in and have retrieved your token, you will need to ensure all subsequent calls to the API includes your token in the `Authorization` header.
 
-If you would like, for ease of use, import and use `BullsEyeAPI` from `/src/apis/bullseye.js` instead of using `axios` directly. This sets the domain and SOME of the headers automatically for you.
-
-You can also store your token in local storage under the key `bullseyeAuth`. If you do this, `BullsEyeAPI` will automatically set the `Authorization` header for you.
-
 __IMPORTANT__ - tokens are currently implemented to expire after 1 hour. 
 
 -----
