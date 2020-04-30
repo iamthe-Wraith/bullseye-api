@@ -84,8 +84,8 @@ class ProductControllers {
       try {
         const requestor = await User.getRequestor(tokenPayload);
 
-        if (requestor.permssions <= PERMISSIONS.ADMIN.lvl) {
-          const product = Product.update(productId, req.body)
+        if (requestor.permissions <= PERMISSIONS.ADMIN.lvl) {
+          const product = await Product.update(productId, req.body)
           Response.send({ product: Product.getSharable(product) }, req, res);
         } else {
           const error = new Error('you are not authorized to make this request');
